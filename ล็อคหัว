@@ -1,0 +1,150 @@
+# War-z-pvp-- jackwinler Hub 🪷 (Cyber Tokyo 2-Column Edition)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- ค่าการตั้งค่า (Config)
+_G.AimbotEnabled = true
+_G.AimPart = "Head" 
+_G.Smoothness = 6 
+_G.ESPEnabled = true
+_G.AutoHealEnabled = true
+_G.HealThreshold = 60 
+_G.HealCooldown = 1.2
+_G.FOVEnabled = true
+_G.FOVRadius = 140 
+
+local lastHealTick = 0
+
+local fovCircle = Drawing.new("Circle")
+fovCircle.Visible = _G.FOVEnabled
+fovCircle.Radius = _G.FOVRadius
+fovCircle.Color = Color3.fromRGB(255, 110, 180)
+fovCircle.Thickness = 1.5
+fovCircle.Filled = false
+fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+-- สร้าง ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "JackwinlerTokyoHub"
+ScreenGui.Parent = game.CoreGui
+
+-- ปุ่มเปิด/ปิดเมนู (ดีไซน์นีออนซากุระกลมโต กดง่าย)
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 15, 25)
+ToggleButton.Position = UDim2.new(0.04, 0, 0.35, 0)
+ToggleButton.Size = UDim2.new(0, 58, 0, 58)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Text = "🌸"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 150, 200)
+ToggleButton.TextSize = 22
+ToggleButton.Draggable = true
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1, 0)
+ToggleCorner.Parent = ToggleButton
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Parent = ToggleButton
+ToggleStroke.Color = Color3.fromRGB(255, 105, 180)
+ToggleStroke.Thickness = 2.5
+
+-- หน้าต่างหลัก (MainFrame แบบ 2 ช่อง กะทัดรัด ไม่ยาวเกินไป)
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 12, 20)
+MainFrame.Position = UDim2.new(0.12, 0, 0.22, 0)
+MainFrame.Size = UDim2.new(0, 420, 0, 240)
+MainFrame.Visible = false
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 14)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Parent = MainFrame
+MainStroke.Color = Color3.fromRGB(255, 110, 180)
+MainStroke.Thickness = 2
+
+-- แถบหัวข้อ (Title Bar)
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundColor3 = Color3.fromRGB(25, 18, 32)
+TitleLabel.Size = UDim2.new(1, 0, 0, 38)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "  🌸  JACKWINLER HUB [TOKYO EDITION]  🪷"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 180, 220)
+TitleLabel.TextSize = 13
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 14)
+TitleCorner.Parent = TitleLabel
+
+-- ปุ่มปิดเมนูมุมขวาบน (X)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Parent = MainFrame
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 90)
+CloseBtn.Position = UDim2.new(1, -32, 0, 6)
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "×"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 16
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(1, 0)
+CloseCorner.Parent = CloseBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+end)
+
+ToggleButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- สร้าง Layout แบบ 2 คอลัมน์ (ซ้าย / ขวา)
+local LeftColumn = Instance.new("Frame")
+LeftColumn.Parent = MainFrame
+LeftColumn.BackgroundTransparency = 1
+LeftColumn.Position = UDim2.new(0.03, 0, 0.22, 0)
+LeftColumn.Size = UDim2.new(0.46, 0, 0.74, 0)
+
+local LeftLayout = Instance.new("UIListLayout")
+LeftLayout.Parent = LeftColumn
+LeftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+LeftLayout.Padding = UDim.new(0, 8)
+
+local RightColumn = Instance.new("Frame")
+RightColumn.Parent = MainFrame
+RightColumn.BackgroundTransparency = 1
+RightColumn.Position = UDim2.new(0.51, 0, 0.22, 0)
+RightColumn.Size = UDim2.new(0.46, 0, 0.74, 0)
+
+local RightLayout = Instance.new("UIListLayout")
+RightLayout.Parent = RightColumn
+RightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+RightLayout.Padding = UDim.new(0, 8)
+
+-- ฟังก์ชันสร้างปุ่มเปิด/ปิดฟังก์ชันแบบเท่ๆ
+local function createToggle(parent, name, defaultState, callback)
+    local btn = Instance.new("TextButton")
+    btn.Parent = parent
+    btn.BackgroundColor3 = defaultState and Color3.fromRGB(160, 50, 110) or Color3.fromRGB(25, 20, 32)
+    btn.Size = UDim2.new(1, 0, 0, 36)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Text = name
+    btn.TextColor3 = defaultState and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 170, 190)
+    btn.TextSize = 11
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRad
